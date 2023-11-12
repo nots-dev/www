@@ -133,15 +133,18 @@ fi
 
 archive_name="$exe_name-$target.tar.gz"
 archive="$install_dir/$archive_name"
-
 latest_tag=""
-if [ $# = 0 ]; then
-  latest_tag=$(
-    curl -s "https://api.github.com/repos/explodingcamera/nots/tags" |
-      grep -oP '"name": "\Knots-cli-[^"]+' |
-      grep "nots-cli-v[0-9]\+\.[0-9]\+\.[0-9]\+$" |
-      head -1
-  )
+
+fetch_latest_tag() {
+  curl -s "https://api.github.com/repos/explodingcamera/nots/tags" |
+    grep -oP '"name": "\Knots-cli-[^"]+' |
+    grep "nots-cli-v[0-9]+\.[0-9]+\.[0-9]+$" |
+    head -1
+}
+
+if [ $# = 0 ] || [ "$1" = "latest" ]; then
+  latest_tag=$(fetch_latest_tag)
+  [ -z "$latest_tag" ] && error "failed to fetch latest tag"
 else
   tag=$1
   if ! echo "$tag" | grep -Eq '^nots-cli-v[0-9]+\.[0-9]+\.[0-9]+$'; then
